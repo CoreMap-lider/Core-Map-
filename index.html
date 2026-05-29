@@ -323,10 +323,13 @@ function showResult(){
         '<p class="ilbl">Sua síntese</p>'+
         '<p>'+ins+'</p>'+
       '</div>'+
-      '<div class="cta-card">'+
-        '<p>Este é o seu mapa. Para aprofundar o autoconhecimento, adquira o <strong>Laudo CORE</strong> completo com análise detalhada dos seus perfis, sabotadores e estratégias de evolução — desenvolvido por Denize e Roberta com base em 60 anos de experiência.</p>'+
-        '<button class="btn-cta">Quero meu laudo completo ↗</button>'+
-      '</div>'+
+     '<div class="cta-card">'+
+  '<p>Receba agora o seu <strong>Laudo CORE</strong> completo por e-mail — análise detalhada do seu perfil, sabotadores e estratégias de evolução.</p>'+
+  '<input id="inp-nome" type="text" placeholder="Seu nome" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;font-size:14px;">'+
+  '<input id="inp-email" type="email" placeholder="Seu e-mail" style="width:100%;padding:10px;margin-bottom:12px;border:1px solid #ddd;border-radius:8px;font-size:14px;">'+
+  '<button class="btn-cta" onclick="enviarLaudo(\''+p1+'\')">Receber meu laudo ↗</button>'+
+  '<p id="msg-email" style="font-size:12px;margin-top:8px;color:#666;"></p>'+
+'</div>'+
       '<button class="restart-btn" onclick="restart()">Refazer avaliação</button>'+
     '</div>'+
     '<div class="em-footer">ExecutivaMentes · executivamente.com.br</div>';
@@ -339,7 +342,17 @@ function showResult(){
     });
   },100);
 }
-
+function enviarLaudo(perfil){
+  const nome = document.getElementById('inp-nome').value.trim();
+  const email = document.getElementById('inp-email').value.trim();
+  const msg = document.getElementById('msg-email');
+  if(!nome || !email){ msg.textContent='Preencha nome e e-mail.'; return; }
+  msg.textContent='Enviando...';
+  enviarLaudoPorEmail(email, nome, perfil).then(function(r){
+    if(r && r.sucesso){ msg.textContent='✓ Laudo enviado! Verifique sua caixa de entrada.'; msg.style.color='#0E7A5A'; }
+    else{ msg.textContent='Erro ao enviar. Tente novamente.'; msg.style.color='#C05030'; }
+  });
+}
 function restart(){
   ans=Array.from({length:25},()=>({}));
   cur=0;
