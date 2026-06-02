@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CORE MAP — Seu Resultado</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --c: #1a6b5a;
+    --o: #b8860b;
+    --r: #1a3a6b;
+    --e: #2d6b2d;
+    --bg: #f8f6f0;
+    --surface: #ffffff;
+    --text: #1a1a1a;
+    --text-muted: #6b6b6b;
+    --border: #e8e4da;
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+  }
+
+  .logo span { color: var(--c); font-weight: 600; }
+
+  .page { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  .greeting {
+    margin-bottom: 40px;
+  }
+
+  .greeting h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 400;
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+
+  .greeting p {
+    color: var(--text-muted);
+    font-size: 15px;
+    font-weight: 300;
+  }
+
+  .name-highlight { color: var(--c); }
+
+  /* GRÁFICO */
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    margin-bottom: 32px;
+  }
+
+  .chart-title {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+    font-weight: 500;
+  }
+
+  .profiles-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .profile-bar-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .profile-bar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .profile-bar-label {
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .profile-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  .profile-bar-score {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 600;
+  }
+
+  .profile-bar-track {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .profile-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 0;
+  }
+
+  .profile-bar-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 300;
+  }
+
+  /* SEÇÕES */
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 400;
+    margin-bottom: 8px;
+  }
+
+  .section-subtitle {
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 300;
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+
+  /* TABS LAUDO */
+  .laudo-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+
+  .laudo-header {
+    padding: 24px 28px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .laudo-header:hover { background: var(--bg); }
+
+  .laudo-rank {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  .laudo-profile-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .laudo-arquetipo {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 300;
+  }
+
+  .laudo-toggle {
+    font-size: 20px;
+    color: var(--text-muted);
+    transition: transform 0.3s;
+    margin-top: 4px;
+  }
+
+  .laudo-toggle.open { transform: rotate(180deg); }
+
+  .laudo-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    padding: 0 28px;
+    gap: 0;
+    flex-wrap: wrap;
+  }
+
+  .laudo-tab {
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .laudo-tab:hover { color: var(--text); }
+  .laudo-tab.active { color: var(--text); border-bottom-color: currentColor; font-weight: 500; }
+
+  .laudo-body {
+    padding: 28px;
+    display: none;
+  }
+
+  .laudo-body.active { display: block; }
+
+  .laudo-content {
+    font-size: 15px;
+    line-height: 1.8;
+    font-weight: 300;
+    color: var(--text);
+  }
+
+  .laudo-content p { margin-bottom: 16px; }
+  .laudo-content p:last-child { margin-bottom: 0; }
+
+  .laudo-content strong {
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .fantasma-item {
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    border-left: 3px solid var(--border);
+  }
+
+  .fantasma-title {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .fantasma-ego {
+    font-style: italic;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+
+  .estrategia-item {
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .estrategia-item:last-child { border-bottom: none; }
+
+  .estrategia-num {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .estrategia-title {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+
+  .estrategia-desc {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  .campo-batalha {
+    background: #f0f7f4;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  .fantasma-section, .estrategia-section {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin: 12px 0 5px;
+  }
+
+  .fantasma-lista, .estrategia-lista {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 8px;
+  }
+
+  .fantasma-lista li, .estrategia-lista li {
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--text);
+    font-weight: 300;
+    padding-left: 16px;
+    position: relative;
+    margin-bottom: 2px;
+  }
+
+  .fantasma-lista li::before, .estrategia-lista li::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: var(--text-muted);
+  }
+
+  /* DESENVOLVIMENTO */
+  .dev-section {
+    margin-top: 40px;
+  }
+
+  .dev-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .dev-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+
+  .dev-card-label {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  .dev-card-profile {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .dev-card-mestre {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+
+  .dev-card-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  .badge-mestre {
+    display: inline-block;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+
+  /* COLLAPSE */
+  .laudo-collapsible { display: none; }
+  .laudo-collapsible.open { display: block; }
+
+  @media (max-width: 640px) {
+    .profiles-grid { grid-template-columns: 1fr; }
+    .dev-cards { grid-template-columns: 1fr; }
+    .header { padding: 14px 16px; }
+    .logo-text, .logo { font-size: 13px; }
+    .page { padding: 20px 14px 60px; }
+    .chart-card { padding: 20px 16px; }
+    .greeting h1 { font-size: 24px; }
+    .section-title { font-size: 19px; }
+    .laudo-tabs { padding: 0 14px; overflow-x: auto; flex-wrap: nowrap; }
+    .laudo-tab { font-size: 12px; padding: 10px 10px; white-space: nowrap; }
+    .laudo-body { padding: 18px 16px; }
+    .laudo-profile-name { font-size: 18px; }
+    .laudo-header { padding: 18px 16px 14px; }
+    .estrategia-item { padding: 14px 0; }
+    .campo-batalha { font-size: 13px; padding: 12px 14px; }
+    .fantasma-item { padding: 16px; }
+    .dev-card { padding: 20px 16px; }
+    .encerramento { padding: 24px 16px; }
+    .encerramento .enc-title { font-size: 20px; }
+    .tip-box { padding: 14px 16px; }
+    .profile-bar-score { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">Executiva<span>Mentes</span> · CORE MAP</div>
+</div>
+
+<div class="page">
+
+  <div class="greeting">
+    <h1>Olá, <span class="name-highlight" id="userName">Liderança</span> 👋</h1>
+    <p>Aqui está o mapa completo do seu perfil. Todos os 4 perfis existem em você — em diferentes intensidades.</p>
+  </div>
+
+  <!-- GRÁFICO DOS 4 PERFIS -->
+  <div class="chart-card">
+    <div class="chart-title">Seus 4 perfis · pontuação total</div>
+    <div class="profiles-grid" id="profilesGrid"></div>
+  </div>
+
+  <!-- COMO VOCÊ LIDERA HOJE -->
+  <div style="margin-bottom: 12px;">
+    <div class="section-title">Como você lidera hoje</div>
+    <div class="section-subtitle">Seus perfis dominantes revelam suas forças naturais — e os padrões que merecem atenção.</div>
+  </div>
+
+  <div id="laudoContainer"></div>
+
+  <!-- ONDE VOCÊ PODE CRESCER -->
+  <div class="dev-section" id="devSection">
+    <div class="section-title">Onde você pode crescer</div>
+    <div class="section-subtitle">Os perfis menos ativos em você guardam um potencial valioso. O caminho de desenvolvimento está no <strong>Lado Mestre</strong> de cada um.</div>
+    <div class="dev-cards" id="devCards"></div>
+  </div>
+
+</div>
+
+<script>
+const PERFIS = {
+  C: {
+    nome: "Controle", subtitulo: "A força que lidera com o próprio pulso",
+    arquetipo: "Vigilante", mestre: "Coragem", cor: "#1a6b5a", corLight: "#e8f4f1",
+    descMestre: "Quando o perfil Controle está menos ativo, desenvolver a Coragem significa aprender a se posicionar mesmo sem todas as garantias, agir diante da incerteza e assumir riscos calculados com confiança. É a força de avançar — mesmo sem o controle total.",
+    resumo: `<p>Em ambientes de alta pressão, onde o tempo é curto e a margem de erro é pequena, sua liderança se torna indispensável. Você tem a rara capacidade de agir enquanto outros ainda estão pensando. Você enxerga o que precisa ser feito e faz. Enquanto o mundo gira no caos, você organiza, executa e entrega. Com presença. Com ritmo. <strong>Com coragem</strong>.</p>
+<p>A força do seu <strong>arquétipo Vigilante</strong> está no movimento. Você é direto, objetivo, comprometido com o resultado. Gosta de ver as coisas acontecendo, prefere decisões rápidas a longas análises, e valoriza a entrega mais do que o discurso. Para você, responsabilidade não se terceiriza — se assume. Por isso, quando a pressão aumenta, é comum que você tome a frente, mesmo que ninguém peça. Porque você sabe o custo de não agir. E sabe que, muitas vezes, é sua ação que evita um problema maior.</p>
+<p>Você inspira confiança porque se posiciona. Porque não foge. Porque faz o que precisa ser feito, mesmo que não seja confortável. Seu senso de urgência não é pressa vazia — é estratégia. Seu foco em excelência não é rigidez — é compromisso. E sua busca por controle nem sempre é sobre poder, mas sobre proteger o que importa.</p>
+<p>Mas é justamente nesse ritmo acelerado que alguns excessos podem passar despercebidos. Às vezes, o impulso de resolver pode atropelar escutas importantes. A necessidade de garantir o padrão pode sufocar o desenvolvimento do time. E a vontade de proteger a entrega pode virar isolamento — onde você carrega mais do que deveria, por acreditar que ninguém fará como você.</p>
+<p>Esse movimento é sutil: começa com o zelo, evolui para o controle e, quando não observado, pode limitar tanto a sua energia quanto o potencial da equipe. Porque nem sempre agir rápido é agir certo. Nem sempre resolver sozinho é resolver melhor. E nem sempre parecer forte é o que mais fortalece sua liderança.</p>
+<p>O seu lado <strong>Mestre</strong> nasceu para conduzir com <strong>coragem</strong>. Mas essa coragem não precisa ser solitária. Quando sua potência encontra espaço para escuta, quando sua ação se abre para a colaboração, você não apenas mantém o controle — <strong>você amplia sua força</strong>.</p>`,
+    obstaculo: `<p>Nem sempre o excesso grita — às vezes, ele apenas acelera.</p>
+<p>Você começa agindo para ajudar. Para garantir o resultado. Para evitar que a equipe se desgaste. Mas, com o tempo, percebe que está fazendo mais do que deveria. Corrigindo o que nem era seu papel. Assumindo decisões que poderiam — e talvez devessem — ser compartilhadas.</p>
+<p>Você acredita que está protegendo a entrega, e está. Mas pode, sem perceber, estar impedindo o crescimento de quem caminha com você.</p>
+<p>Porque agir rápido é importante — mas escutar antes de agir também é. Porque garantir excelência é nobre — mas permitir que outros aprendam a entregar com você é necessário. Porque controlar o processo pode funcionar — mas abrir espaço para a autonomia fortalece não só o time, como sua própria liderança.</p>
+<p>E o que era coragem vira sobrecarga. O que era prontidão vira urgência constante. O que era força vira peso.</p>
+<p>É nesse ponto que sua liderança precisa se recalibrar. Não para perder potência — mas para preservar energia e multiplicar impacto.</p>
+<p style="margin-top:16px;font-style:italic;color:#6b6b6b;font-size:14px;border-left:3px solid #e8e4da;padding-left:12px">Nem todos os comportamentos abaixo vão aparecer com a mesma força para você. Alguns podem já ter sido superados ou transformados ao longo da sua jornada — outros talvez ainda existam de forma mais sutil, disfarçados de boas intenções. <strong style="color:#1a1a1a">Leia com curiosidade, e não com julgamento. Às vezes, o sabotador não grita… mas sussurra.</strong></p>`,
+    fantasmas: [
+      { titulo: "Medo de Parecer Vulnerável",
+        cenario: "Você está diante de uma decisão importante que envolve dados técnicos específicos — um relatório complexo de viabilidade, uma simulação financeira, ou até uma análise de risco em uma proposta comercial. Você sabe que não domina todos os detalhes. Poderia acionar o especialista da área, validar com o par responsável, envolver o time. Mas algo trava. A ideia de admitir essa limitação soa como fraqueza. Então, você decide sozinho. Faz suposições, age com base na intuição ou no pouco que entende... e tenta sustentar a segurança no olhar firme e no discurso técnico.",
+        impacto: "A decisão não se sustenta. Há furos, retrabalho, desgaste com outras áreas. Mesmo diante das falhas, você evita assumir a vulnerabilidade — e reforça um ciclo silencioso: «É melhor carregar sozinho do que parecer frágil». Aos poucos, a equipe percebe que você não compartilha dúvidas, não abre espaço para contribuições. Isso mina a colaboração e aumenta a distância entre você e o time.",
+        esconde: ["A crença de que pedir ajuda é sinal de fraqueza ou despreparo","O medo de perder autoridade ao demonstrar incerteza","A necessidade de sustentar uma imagem de domínio pleno — mesmo quando isso compromete o resultado","A dificuldade de confiar no conhecimento do outro, por medo de ser descredibilizado"],
+        ego: '"Se eu mostrar que não sei, não irão me respeitar mais."' },
+      { titulo: "Necessidade de Controle",
+        cenario: "A empresa está passando por uma reestruturação. Papeis estão sendo revistos, processos redesenhados, novas lideranças surgindo. Você, que sempre soube exatamente onde começa e termina sua atuação, começa a se sentir exposto. A sensação de que pode perder espaço ou relevância faz com que, sem perceber, você se feche. Segura informações que poderiam ser compartilhadas. Participa das reuniões — mas omite partes importantes das decisões. Diz que «está resolvendo» — mas evita delegar. O discurso externo é de agilidade, mas por dentro a motivação é outra: «Se eu abrir demais, posso perder o controle».",
+        impacto: "O time se retrai. Os pares perdem confiança. Os parceiros deixam de colaborar. Sem espaço para participar das decisões ou contribuir com autonomia, o entorno se cala — e você se vê sobrecarregado, frustrado e com a falsa sensação de que «só eu dou conta». A área perde ritmo. A colaboração se transforma em desconfiança velada. E o que começou como proteção acaba gerando isolamento estratégico — justamente o oposto do que você queria.",
+        esconde: ["A crença de que compartilhar é abrir mão do controle — e do poder","O medo de ser substituído, deixado de lado ou visto como dispensável","A dificuldade de confiar na maturidade do time e na intenção dos pares","Um senso de responsabilidade tão elevado que beira o salvadorismo","A ilusão de que 'é mais rápido se eu fizer sozinho', quando, na verdade, é mais desgastante"],
+        ego: '"Se eu não controlar, vão me deixar de lado."' },
+      { titulo: "Impulsividade",
+        cenario: "Durante uma reunião semanal, um colaborador começa a explicar um problema que enfrentou na entrega de um projeto. Antes que ele conclua, você já entende o que aconteceu — e, com foco e clareza, propõe de imediato uma solução. Você não interrompe de forma ríspida, mas conduz a fala de forma direta: «Já entendi. Faz assim, assim e depois me avisa.» A equipe vê agilidade. O problema se resolve. Mas o liderado sai da reunião sem saber se sua análise estava certa, sem sentir que foi ouvido, e sem exercitar sua autonomia. Aos poucos, o time deixa de trazer caminhos e passa apenas a esperar sua orientação. Você percebe que todos estão «dependentes», mas não conecta isso com a sua pressa em resolver tudo sozinho.",
+        impacto: "O time passa a filtrar o que traz, reduz a autonomia e espera sua condução até para coisas simples. Você continua no controle — mas sobrecarregado e sem tempo para as estratégias mais importantes. Os erros diminuem... da sua percepção. Porque agora, muitos nem chegam até você.",
+        esconde: ["O impulso de proteger o resultado antes de compreender a causa","A crença de que demonstrar firmeza significa agir logo — mesmo que sem contexto","A tendência a confiar mais na sua leitura rápida do que na escuta ativa","O medo de que, se não se posicionar, perderá respeito ou controle","A dificuldade de esperar... até escutar"],
+        ego: '"Já sei o que precisa ser feito, não tenho tempo para rodeios."' }
+    ],
+    estrategias: [
+      { titulo: "Quando a impulsividade atropela a estratégia...", oq: "Você reage no calor do erro. Fala alto, corrige rápido, cobra no susto. Ganha atenção — mas perde conexão e compromisso. A equipe trava.", ap: ["Respire antes de agir. Literalmente. Dê 5 minutos.","Escute duas versões. Verifique se a falha é padrão ou exceção.","Se precisar corrigir, corrija. Mas com estratégia, não com descarga emocional."], batalha: "Alguém errou um dado em uma reunião com cliente? Diga: «Vamos entender o que aconteceu — depois alinhamos como corrigir.» Isso mantém sua autoridade — e aumenta o respeito." },
+      { titulo: "Quando a firmeza vira dureza...", oq: "Você se posiciona, mas fecha o espaço de diálogo. A intenção era mostrar direção — mas a mensagem vira muro. A equipe cumpre, mas se cala.", ap: ["Mantenha o tom firme, mas deixe espaço para escuta.","Evite corrigir em público o que pode ser ajustado em particular.","Mostre que cobrança e respeito podem coexistir."], batalha: "Alguém questiona uma decisão sua em tom inadequado? Responda: «Depois alinhamos, agora seguimos com o combinado.» Mostra liderança sem perder o controle emocional." },
+      { titulo: "Quando a pressa impede a escuta...", oq: "Você quer resolver logo — e corta o desabafo pela metade. Pede foco, meta, número. Mas o que o time precisava era ser ouvido. Resultado? Tensão, ruído e desalinhamento.", ap: ["Valide a emoção antes de mudar de assunto.","Dê 3 minutos de escuta plena antes de redirecionar.","Use frases-ponte que acolhem e retomam o foco."], batalha: "Alguém desabafa em plena reunião de resultados? Diga: «Vamos marcar 10 minutos depois pra isso. Quero te ouvir.» Você mostra cuidado — e mantém a cadência da entrega." },
+      { titulo: "Quando você começa a carregar tudo...", oq: "Você assume, resolve, antecipa, entrega. E sem perceber, a equipe desacelera. Porque você ensinou que dá conta — mesmo sobrecarregado.", ap: ["Delimite sua zona de ação e distribua o resto.","Delegue com briefing claro, prazo e critério de sucesso.","Aceite que o time só cresce quando você abre espaço."], batalha: "Precisa montar uma apresentação importante? Divida em três partes: dados, narrativa e design. Distribua. Acompanhe só os pontos críticos. Você foca no que só você pode fazer." },
+      { titulo: "Quando o perfeccionismo trava a confiança no time...", oq: "Você revisa tudo, ajusta detalhes, corrige até o que está «quase bom». A equipe para de tentar inovar — e começa a apenas tentar agradar.", ap: ["Reforce o que foi positivo antes de ajustar.","Dê autonomia progressiva com checkpoints combinados.","Lembre-se: excelência se constrói com tentativa, erro e evolução."], batalha: "Alguém apresentou uma ideia nova, mas com falhas? Diga: «Tem potencial. Vamos melhorar juntos.» Você mantém o padrão — e ainda incentiva crescimento." },
+      { titulo: "Quando só você toma decisões importantes...", oq: "Você decide rápido, com clareza — mas sozinho. A equipe executa, mas não se compromete. Porque quem não constrói, não sustenta.", ap: ["Compartilhe o desafio e ouça caminhos possíveis.","Dê a palavra final, mas com base em colaboração.","Traga o time para o campo da decisão — não só da entrega."], batalha: "Precisa mudar uma estratégia que afeta todo o time? Chame os líderes, apresente o cenário e pergunte: «Como vocês fariam isso funcionar?» Você lidera com autoridade — e gera pertencimento real." }
+    ]
+  },
+  O: {
+    nome: "Ordem", subtitulo: "A mente que estrutura o impossível",
+    arquetipo: "Estrategista", mestre: "Visão", cor: "#b8860b", corLight: "#faf4e6",
+    descMestre: "Quando o perfil Ordem está menos ativo, desenvolver a Visão significa aprender a enxergar o todo estratégico, construir sistemas e estruturas que sustentam resultados, e transformar o caos em clareza para quem está ao redor.",
+    resumo: `<p>Você é aquele que organiza o invisível. Sua mente não apenas enxerga com nitidez o que precisa ser feito — o seu <strong>arquétipo Estrategista</strong> estrutura o caminho, conecta os pontos, traduz o caos em clareza. Enquanto muitos atuam no improviso, você constrói sistemas. Onde há ruído, você percebe padrões. Onde há pressão, você responde com objetividade.</p>
+<p>O seu lado <strong>Mestre da Visão</strong> representa o pulso da ordem e da lógica. Sua força está em transformar o incerto em planos possíveis, sustentando entregas consistentes mesmo em cenários voláteis. Você honra prazos, prevê riscos, cuida dos processos e sabe exatamente onde quer chegar. E mais que isso: você entende o impacto de cada detalhe na entrega final.</p>
+<p>Em ambientes competitivos, seu perfil se destaca pela <strong>consistência e previsibilidade</strong>. Enquanto o cenário muda, você analisa. Enquanto a pressão cresce, você busca estrutura. Sua calma estratégica inspira confiança — especialmente em momentos de crise.</p>
+<p>Mas essa mesma capacidade, se não for observada, pode se transformar em armadilha: afastar pessoas, gerar distância emocional, reduzir a escuta e dificultar a colaboração. A liderança que sustenta grandes planos também precisa abrir espaço para que outros participem deles.</p>`,
+    obstaculo: `<p>Às vezes, o que pesa não é o que você faz — é o que você deixa de perceber.</p>
+<p>Enquanto você estrutura, o time espera clareza. Enquanto você aperfeiçoa, a janela de oportunidade se fecha. Enquanto você sustenta a estratégia, sua equipe pode se perguntar: <em>"Será que ele confia na gente?"</em></p>
+<p>Sua mente está cheia de caminhos, mas por fora, parece distante. Você entrega com consistência, mas quem está ao redor sente falta de conexão. Você quer proteger a qualidade — mas pode estar sufocando a colaboração.</p>
+<p>E sem perceber, seu silêncio estratégico vira isolamento. Seu zelo, controle. Seu planejamento, resistência.</p>
+<p>Não é sobre mudar quem você é — é sobre ajustar a lente. Para que sua <strong>visão</strong> continue sendo uma força… mas que outros também consigam enxergar com você.</p>
+<p style="margin-top:16px;font-style:italic;color:#6b6b6b;font-size:14px;border-left:3px solid #e8e4da;padding-left:12px">Nem todos os comportamentos abaixo vão aparecer com a mesma força para você. <strong style="color:#1a1a1a">Leia com curiosidade, e não com julgamento. Às vezes, o sabotador não grita… mas sussurra.</strong></p>`,
+    fantasmas: [
+      { titulo: "Medo de Falhas",
+        cenario: "Você tem uma ideia sólida para otimizar um processo-chave da área, estruturou boa parte da proposta, mas acredita que ainda precisa «refinar mais» antes de apresentar. Em uma reunião estratégica, antes que você se sinta pronto para contribuir, um colega expõe uma proposta semelhante — ainda que incompleta. A ideia é acolhida, elogiada e já entra no radar da diretoria.",
+        impacto: "Você se frustra, sente que perdeu espaço e, internamente, se cobra por «não ter sido rápido o suficiente». A equipe não entende por que você não trouxe a ideia antes, e você começa a se questionar sobre sua capacidade de influência. O ciclo se repete: ideias excelentes ficam guardadas por medo de imperfeição — enquanto outros avançam com confiança, mesmo sem ter tudo pronto.",
+        esconde: ["A crença de que, se não estiver 100%, você será julgado ou descredibilizado","A sensação de que 'errar em público' compromete sua imagem técnica e estratégica","A dificuldade de lidar com a vulnerabilidade da exposição incompleta"],
+        ego: '"Se não estiver impecável, é melhor não apresentar."' },
+      { titulo: "Insegurança",
+        cenario: "Você precisa tomar uma decisão estratégica sobre um cliente de grande impacto: recuar de uma negociação ou avançar com uma condição que pode gerar risco de exposição. A decisão está claramente dentro da sua alçada. Mas, mesmo com dados suficientes, você busca validação de pares, aciona a diretoria, agenda reuniões para «alinhamento» e, no fundo, espera que alguém diga: «vai por aqui».",
+        impacto: "A demora gera ruído com o cliente e insegurança no time. O mercado avança. Sua liderança perde força justamente por não ter exercido autonomia no momento em que ela era esperada. E, internamente, você sente que agiu com cautela — mas, na prática, deixou passar a oportunidade de se posicionar com firmeza e visão.",
+        esconde: ["Medo de tomar uma decisão imperfeita e depois ser questionado","Dificuldade de sustentar sozinho o risco da exposição","Crença de que, se houver erro, a culpa precisa ser compartilhada"],
+        ego: '"Se eu decidir sozinho e der errado, vão me julgar."' },
+      { titulo: "Baixa Tolerância ao Erro",
+        cenario: "Você detecta um pequeno erro em uma planilha de custos apresentada à diretoria. A falha não compromete o resultado, mas você imediatamente sente que «não podia ter acontecido». Passa a noite revisando todo o projeto, ajustando detalhes que nem estavam com problema. No dia seguinte, compartilha o material e afirma: «Desculpem pelo erro — não aceito esse tipo de falha em algo que carrega meu nome.»",
+        impacto: "A equipe absorve que errar é inaceitável. Começa a revisar tudo excessivamente, perde agilidade e evita protagonismo por medo de falhar. Você, que queria inspirar excelência, sem perceber cria um ambiente onde a insegurança cresce — e os erros passam a ser escondidos. Sua entrega continua impecável, mas você se vê cada vez mais sozinho e sobrecarregado.",
+        esconde: ["A crença de que a sua reputação está diretamente ligada à perfeição técnica","O medo de que qualquer deslize afete sua credibilidade como referência","Uma vaidade silenciosa: o orgulho legítimo por ser alguém que 'nunca erra' — mas que torna insuportável errar"],
+        ego: '"Se eu falhar em algo tão simples, como vão confiar em mim no que é complexo?"' }
+    ],
+    estrategias: [
+      { titulo: "Quando o feedback é técnico demais e não gera transformação...", oq: "Você é direto, analítico e entrega o feedback com base em dados. Mas o impacto emocional passa despercebido. O colaborador sai calado da conversa — e o comportamento não muda. O que era para ser crescimento vira desconexão.", ap: ["Use o modelo de feedback com camadas: comece com um reconhecimento legítimo, apresente o ponto de atenção com clareza, finalize com uma pergunta que promova autorreflexão.","Lembre-se: feedback eficaz não é apenas exato — é útil."], batalha: "Analista entregou relatório completo, mas com pouco aprofundamento nas soluções? Diga: «Percebi que você estruturou bem os dados — isso mostra domínio técnico. Agora, me conta: o que te impediu de ir além dos números e trazer possíveis soluções?» Você valida, sinaliza o ponto e estimula reflexão — sem afastar." },
+      { titulo: "Quando você ouve dados, mas não escuta emoções...", oq: "Você faz reuniões produtivas, tem domínio dos indicadores e conduz planos com precisão. Mas, no fundo, seu time sente que não pode falar do que não cabe na planilha. A performance parece boa, mas a conexão se perde. E o silêncio começa a gerar ruído.", ap: ["Pratique escuta estruturada: crie rituais em que perguntas humanas façam parte da agenda.","Combine lógica com sensibilidade: liderar também é escutar o que o outro ainda não conseguiu dizer.","Inclua uma pergunta aberta antes de mergulhar nos números."], batalha: "Início da reunião de resultado? Antes de analisar o funil, diga: «O que está te desafiando mais nesse ciclo?» ou «Qual parte da rotina está te exigindo mais do que deveria?» Você abre espaço para a vulnerabilidade com inteligência emocional." },
+      { titulo: "Quando você compartilha o plano, mas ninguém parece engajado...", oq: "Você apresenta a estratégia com clareza. Para você, tudo faz sentido. Mas, na prática, o time não executa como imaginado. Surgem dúvidas fora de hora, desalinhamentos e entregas aquém do esperado.", ap: ["Teste o entendimento da equipe, não a sua explicação.","Use linguagem viva, traduza o estratégico em operacional com eles.","Promova briefings invertidos — onde eles explicam a estratégia com as próprias palavras."], batalha: "Vai lançar uma nova abordagem comercial? Apresente o plano e diga: «Vamos praticar? Como vocês poderiam ensinar isso para um novo integrante do time?» Você vai identificar rapidamente o que foi absorvido — e o que ainda precisa de ajuste." },
+      { titulo: "Quando você está sobrecarregado, mas não consegue soltar...", oq: "Você tem um time capaz, mas segura as decisões mais estratégicas. Só se sente seguro quando está por perto, acompanhando cada passo. Resultado? O time trava, a liderança sobrecarrega — e o resultado não acelera.", ap: ["Delegue não tarefas — mas oportunidades de crescimento.","Foque no impacto, não apenas no controle da execução.","Mantenha o alinhamento nos pontos críticos, mas libere espaço para autonomia."], batalha: "Precisa apresentar uma nova análise de mercado para a diretoria? Diga: «Quero que você estruture a apresentação, e nós fazemos juntos a parte com os dados sensíveis.» Você ainda garante a qualidade — mas abre caminho para o desenvolvimento do outro." },
+      { titulo: "Quando você espera demais por segurança... e perde o timing.", oq: "Você quer acertar. E por isso revê tudo 3 vezes. Mas o cenário muda — e o plano perfeito já nasce defasado. A decisão que parecia prudente, agora soa lenta.", ap: ["Use a Regra 70/30: avance com 70% de dados, corrija com 30% no caminho.","Teste, mensure, ajuste — mas em movimento."], batalha: "Está para lançar um plano de incentivo comercial? Aplique: «Vamos lançar com o básico — e revisar a cada semana conforme os resultados.» Mais ação, menos espera. Resultado com evolução." },
+      { titulo: "Quando um imprevisto bagunça seu plano inteiro...", oq: "Você preparou tudo. Cronograma, metas, projeções. Mas algo fora do esperado acontece — a concorrência antecipou a campanha, o cliente mudou o jogo. E sua primeira reação é: «Vamos parar e refazer tudo.»", ap: ["Planeje com zonas de flexibilidade.","Crie pontos de revisão antes do caos — para ajustar antes de imprevistos."], batalha: "Em campanhas sazonais de alta demanda, defina com o time: «Toda sexta revisamos o plano com base em interferências e resultado parcial.» Você mantém a direção — e reduz o desgaste com microcrises." },
+      { titulo: "Tomada de decisão com foco", oq: "Você é surpreendido com uma demanda de última hora — precisa apresentar parte da pauta da reunião executiva do dia seguinte. O tema é conhecido, você domina os dados, mas seu padrão pede estrutura. E aí trava.", ap: ["Aja com o que já está na sua cabeça. Use o conhecimento que você já construiu.","Estruture os tópicos principais e siga com clareza.","Entenda que presença, clareza e consistência valem mais que perfeição."], batalha: "Seu gestor diz: «Amanhã você apresenta a parte de resultados da área.» Você respira, organiza os 3 tópicos-chave e responde: «Claro. Vou estruturar os principais pontos que temos sólidos até agora e posso incluir os dados mais atualizados logo cedo.» Você mostra prontidão, não perfeição. E ao fazer isso, passa confiança — inclusive para si mesmo." }
+    ]
+  },
+  R: {
+    nome: "Relacionamento", subtitulo: "O coração que sustenta conexões",
+    arquetipo: "Embaixador", mestre: "Empatia", cor: "#1a3a6b", corLight: "#e8eef5",
+    descMestre: "Quando o perfil Relacionamento está menos ativo, desenvolver a Empatia significa aprender a criar conexões genuínas, escutar ativamente, construir ambientes de confiança e entender que resultados duradouros nascem de relações consistentes.",
+    resumo: `<p>Você é quem <strong>transforma laços em alianças verdadeiras</strong>. Onde outros veem distância, você constrói pontes. Sua força vai além da empatia — ela está em criar espaços seguros onde as pessoas se sentem vistas, onde conflitos não se evitam, mas se transformam. <strong>Você é o Embaixador</strong> que lidera com presença emocional, generosidade e um olhar que enxerga além da superfície. Sua maestria está em provar que harmonia não é ausência de atrito — é a coragem de acolher tensões com humanidade e clareza.</p>
+<p>O seu lado <strong>Mestre da Empatia</strong> representa o pulso da colaboração, da escuta e do pertencimento. Constrói confiança com escuta ativa, aproxima com empatia e sustenta vínculos mesmo em meio à pressão. Sua sensibilidade é radar: você percebe o clima, lê o não dito, e age com delicadeza onde outros passariam direto.</p>
+<p>Sua presença aproxima. Você não impõe — convida. Não apaga o desconforto — facilita o diálogo. Crê que resultados duradouros nascem de relações consistentes, e por isso cuida do ambiente, das pessoas e da energia do grupo com atenção sincera.</p>
+<p>Mas sua potência também exige vigilância. A vontade de preservar a harmonia pode te levar a se calar quando deveria se posicionar. Você tende a assumir pesos que não são seus, evita confrontos para não magoar, diz «sim» quando queria dizer «não» — e isso pode gerar frustração silenciosa.</p>
+<p>Na pressão, você tenta sustentar o emocional de todos — mas se abandona no processo. Sente culpa por não corresponder a todas as expectativas, e dúvida quando não se sente reconhecido. Pode engolir sua opinião, adiar decisões desconfortáveis ou se adaptar tanto que esquece de si.</p>
+<p>E assim, o mesmo coração que une, às vezes se esconde. O medo de desagradar ou de romper vínculos pode minar sua autenticidade — e te fazer duvidar do seu valor.</p>
+<p>Você nasceu para criar conexões com verdade. E quando entende que colocar limites também é um ato de amor, que sua voz é tão importante quanto sua escuta, e que sua empatia não precisa te diminuir, você floresce. Com mais leveza. Com mais inteireza. Com mais você.</p>`,
+    obstaculo: `<p>Sua empatia é um dom — mas, se não for acompanhada de consciência, pode se transformar em uma armadilha silenciosa.</p>
+<p>O mesmo cuidado que acolhe, pode adiar conversas difíceis. O mesmo desejo de proteger o clima do time, pode sufocar sua própria voz. A mesma habilidade de gerar conexão, pode virar lentidão na tomada de decisões.</p>
+<p>Você não gosta de conflitos — e tudo bem. Mas, às vezes, ao evitá-los, você deixa que ruídos cresçam no silêncio. Você se importa com as pessoas — profundamente. Mas, por medo de decepcionar, pode assumir o que não é seu, aceitar o que te atravessa e dizer «sim» quando tudo em você queria dizer «não».</p>
+<p>Às vezes, sua escuta generosa se transforma em sobrecarga emocional. Sua doçura vira omissão. Seu cuidado vira culpa. E, aos poucos, você vai se adaptando, cedendo, recuando… até quase sumir.</p>
+<p>Essa é a virada sutil da sua potência. Não vem com estardalhaço. Vem com silêncios. Com mensagens não enviadas. Feedbacks adiados. Opiniões engolidas. E aquela sensação de que, para manter a harmonia, você precisa esconder quem é de verdade.</p>
+<p>Mas harmonia real não se constrói com silenciamento — e sim com respeito mútuo. Limites claros também são formas de amor. Vínculos verdadeiros não se rompem com posicionamento — eles se fortalecem.</p>
+<p style="margin-top:16px;font-style:italic;color:#6b6b6b;font-size:14px;border-left:3px solid #e8e4da;padding-left:12px">Nem todos os comportamentos abaixo vão aparecer com a mesma força para você. <strong style="color:#1a1a1a">Leia com curiosidade, e não com julgamento. Às vezes, o sabotador não grita… mas sussurra.</strong></p>`,
+    fantasmas: [
+      { titulo: "Medo do Conflito",
+        cenario: "Dois colaboradores da sua equipe entram em conflito direto sobre prioridades em um projeto importante. Você percebe a tensão, entende os dois lados, mas, ao invés de intervir com clareza, suaviza a situação dizendo: «Vamos respirar e focar no que temos em comum, tudo bem?» O momento passa — mas o desconforto permanece no ar.",
+        impacto: "A disputa não resolvida vira ruído. Ressentimentos crescem no silêncio. E você sente que está sempre apagando incêndios emocionais que poderiam ter sido prevenidos com um posicionamento firme e respeitoso.",
+        esconde: ["O medo de ser visto como autoritário ou 'duro demais'","A falsa crença de que evitar o confronto é proteger o time","A insegurança sobre como liderar sem perder a empatia"],
+        ego: '"Se eu me meter nisso, o conflito pode virar contra mim. Não quero ser o vilão!"' },
+      { titulo: "Necessidade de Ser Amado",
+        cenario: "Um colaborador querido pede ajustes recorrentes na rotina — sair mais cedo, adiar entregas, escapar de reuniões. Mesmo sabendo que isso causa desequilíbrio no time, você permite. Internamente, sente incômodo, mas evita dizer «não».",
+        impacto: "A equipe observa e começa a questionar sua imparcialidade. Você, que tanto preza pela confiança, percebe olhares desconfiados — e sente o peso da culpa por ter dito «sim» para manter a harmonia.",
+        esconde: ["A crença de que ser querido é mais importante do que ser justo","O medo de ser criticado ou mal interpretado","A dificuldade de lidar com o desagrado do outro"],
+        ego: '"Se eu disser não, ele vai falar mal de mim para os outros."' },
+      { titulo: "Medo de Magoar",
+        cenario: "Você acompanha há semanas o desempenho em baixa performance de um vendedor experiente da equipe. Os números não melhoram, mas você evita trazer o tema diretamente. Em vez disso, opta por reforçar os pontos positivos em reuniões gerais, elogiando o esforço do grupo e sugerindo, de forma sutil, que «todos olhem para as metas com mais atenção».",
+        impacto: "O colaborador não percebe que está abaixo do esperado. Continua no mesmo ritmo, acreditando que está fazendo o suficiente. A performance geral da área começa a ser comprometida, e você carrega a frustração silenciosa de não ter colocado a conversa onde ela precisava estar: no lugar da verdade com respeito.",
+        esconde: ["Medo de gerar constrangimento ou desmotivação. Dificuldades em gerir conversas difíceis.","Dúvida sobre como ser firme sem soar duro","A crença de que conversas difíceis fragilizam vínculos"],
+        ego: '"Se eu for direto demais, ele vai se fechar ou perder a motivação."' }
+    ],
+    estrategias: [
+      { titulo: "Quando escutar demais impede de agir...", oq: "Você escuta, acolhe, entende. Mas, por não querer parecer autoritário, evita tomar decisões logo após o diálogo. A conversa fica no ar — e os conflitos continuam, como um ruído que nunca é resolvido.", ap: ["Escute com atenção, mas finalize com uma direção clara.","Mostre que acolher também é agir.","Use frases que unem empatia e autoridade: «Você prefere resolver isso sozinho ou quer minha ajuda para alinhar?»"], batalha: "Um colaborador desabafa sobre uma tensão com outro colega. Ao final, diga: «Entendo como isso te impacta. Agora me conta: você consegue resolver isso diretamente com ele ou prefere que a gente converse juntos?» Você lidera com escuta — e também com direção." },
+      { titulo: "Quando dizer 'sim' demais desconecta você de si mesmo...", oq: "Você aceita, se compromete, encaixa na agenda. Por fora, está tudo bem. Por dentro, você sente que está se anulando a cada 'sim' que deveria ter sido um 'não'. A vontade de manter o clima leve pode virar acúmulo silencioso.", ap: ["Perceba que dizer 'não' com respeito é maturidade, não frieza.","Escolha uma situação por semana em que você se priorize — mesmo que isso desagrade alguém.","Treine frases que colocam limites com empatia: «Quero ajudar, mas preciso garantir minha entrega principal primeiro.»"], batalha: "Seu gestor convida para um projeto importante, mas você está no limite da energia. Diga com firmeza gentil: «Quero muito participar, mas acredito que me ausentar neste momento pode interferir diretamente no nosso resultado. Qual impacto no projeto se outro líder me substituir neste momento específico?» Limite não é barreira — é autocuidado com consciência." },
+      { titulo: "Quando o excesso de escuta adia a decisão…", oq: "Você quer garantir que todos estejam incluídos. Espera o feedback de cada pessoa, ouve todas as perspectivas, busca alinhar cada ponto… Mas, ao tentar agradar e unir, o tempo passa. A decisão não vem. A equipe começa a se frustrar.", ap: ["Defina 3 critérios objetivos antes de ouvir o grupo.","Mantenha um prazo-limite para decidir.","Decida e comunique com clareza, explicando o porquê. Decisão empática não é ausência de decisão — é decisão com sentido."], batalha: "Precisa escolher entre duas plataformas de CRM e ainda não decidiu? Diga: «Pessoal, avaliei três pontos-chave: custo, integração com o time e prazo de implementação. Com isso, vamos seguir com a Plataforma X. Agradeço cada contribuição — ela ajudou a construir essa escolha.» Você honra a escuta, mas assume o papel de líder." },
+      { titulo: "Quando evitar a conversa custa caro no resultado…", oq: "Você percebe que os erros estão se repetindo. A performance está abaixo. Mas o medo de magoar te faz adiar a conversa. Você diz que está esperando o 'momento certo' — mas esse momento nunca chega.", ap: ["Prepare-se com dados, mas conduza com empatia.","Ajude o colaborador a refletir — sem acusar, mas também sem proteger demais.","Faça acordos e agende a próxima conversa."], batalha: "Aborde o colaborador com performance abaixo com clareza e perguntas: «Tenho observado que suas entregas não vêm atingindo o resultado esperado nos últimos ciclos. Isso me preocupa porque pode impactar suas próximas oportunidades no time. Vamos pensar juntos: o que tem te atrapalhado? O que você percebe que poderia ter sido feito diferente?» Você provoca consciência sem humilhar." },
+      { titulo: "Quando tudo pesa — até o que não é seu...", oq: "Você escuta. Apoia. Acompanha as emoções da equipe. Está sempre presente. Mas chega no fim do dia emocionalmente esgotado — mesmo quando nada grave aconteceu com você. É como se absorvesse a tensão do ambiente sem perceber.", ap: ["Faça uma 'higiene emocional' no fim do expediente.","Identifique o que é seu — e o que não é.","Crie um ritual de separação: isso te ajuda a não levar para casa aquilo que não te pertence."], batalha: "Depois de um dia intenso, antes de sair, pare 5 minutos e escreva: «O que ouvi hoje que me incomodou? O que é fato? O que é somente pensamento negativo? / Disso tudo, o que é meu para resolver? / O que é do outro e eu posso apenas apoiar — sem carregar?» Você honra sua escuta — mas escolhe não se afundar no que não é seu." },
+      { titulo: "Quando o 'sim' compromete sua entrega...", oq: "Você valoriza a colaboração, gosta de estar disponível e acredita no poder do coletivo. Mas, na tentativa de sustentar o bem-estar do time, aceita mais do que pode. Diz 'sim' para manter a harmonia — mas, por dentro, sabe que está sacrificando seu tempo, sua energia e, muitas vezes, sua excelência.", ap: ["Avalie se a sua ajuda fortalece ou sabota o equilíbrio da equipe.","Dizer 'não' pode ser o maior ato de liderança — quando feito com respeito e intenção.","Antes de aceitar mais uma demanda, pergunte: «Consigo sustentar esse compromisso sem prejudicar o que já assumi?»"], batalha: "Seu par pede apoio extra em um projeto. Você olha para sua agenda — sabe que precisará abrir mão do seu foco. Responda: «Quero muito te apoiar, mas nesse momento preciso manter meu foco no fechamento da meta do trimestre. Se puder, posso ajudar com um olhar estratégico mais adiante.» Você não rompe a conexão — só escolhe não se romper." },
+      { titulo: "Quando tudo parece urgente — e você perde o que é essencial...", oq: "Você sente o ambiente. Captura o que os outros não dizem. Mas essa sensibilidade, quando sem filtro, pode te levar a priorizar o que tem mais emoção, não o que tem mais impacto. Você acaba cedendo para quem está mais ansioso — e deixa de lado o que realmente move o resultado.", ap: ["Antes de agir, pergunte: «Isso me mobilizou pela importância ou pela pressão emocional?»","Crie uma régua de decisão simples: o que gera impacto direto no objetivo estratégico do time?","Use a inteligência emocional e foque no que gera resultado mais rápido."], batalha: "Segunda-feira, 9h. Dois alertas urgentes: pedido emotivo de um colaborador sobre um conflito, e e-mail da diretoria pedindo dados de performance para apresentação às 14h. Você respira fundo e decide: «Esse alinhamento com a diretoria pode destravar novas oportunidades para toda a equipe. Vou organizar os dados agora e, após o almoço, converso com o colaborador com mais presença.» Você não ignorou a emoção — apenas escolheu o momento certo." }
+    ]
+  },
+  E: {
+    nome: "Equilíbrio", subtitulo: "A alma que sente o que muitos não percebem",
+    arquetipo: "Harmonizador", mestre: "Serenidade", cor: "#2d6b2d", corLight: "#ecf4ec",
+    descMestre: "Quando o perfil Equilíbrio está menos ativo, desenvolver a Serenidade significa aprender a sustentar presença calma diante da pressão, criar harmonia consciente — não por omissão, mas por escolha intencional. É a capacidade de equilibrar sem se apagar, de harmonizar sem se perder.",
+    resumo: `<p>Você carrega uma profundidade que não se impõe, mas transforma. Sua presença é sutil, mas marcante. Onde outros reagem, você observa. Onde há ruído, você oferece silêncio. Sua liderança nasce do cuidado — e se move com delicadeza firme, capaz de sustentar espaços seguros mesmo em meio à pressão.</p>
+<p><strong>A sensibilidade do seu arquétipo Harmonizador é estratégica</strong>. Você percebe tensões antes que se tornem crises, escuta o que não é dito e acolhe com presença. No seu olhar, existe escuta. E na sua escuta, existe um poder de transformação silenciosa.</p>
+<p>Você representa o pulso da harmonia consciente. Conecta pessoas, e seu <strong>lado Mestre da Serenidade</strong> modera tensões, constrói pontes onde outros veriam abismos. Sua força está em integrar — não em dividir. Seu jeito respeitoso inspira confiança. Você não chega impondo — chega compreendendo. E, com isso, conquista.</p>
+<p>Mas essa mesma capacidade, se não for observada, pode se tornar armadilha. O desejo de preservar o equilíbrio pode virar silêncio. A empatia, auto anulação. O cuidado com o outro, esquecimento de si.</p>
+<p>Você tende a evitar atritos, adiar decisões ou abrir mão da própria opinião para não causar desconforto. E, aos poucos, isso te afasta do próprio centro. Em ambientes exigentes, pode parecer que você está sempre um passo atrás — esperando a segurança que nunca vem. Enquanto outros arriscam, você espera o ajuste perfeito.</p>
+<p>Mas equilíbrio não é neutralidade — é presença com intenção. E quando você entende que pode ser firme sem perder a gentileza, tudo muda. Que sua voz importa tanto quanto sua escuta. Que proteger sua energia também é liderança.</p>
+<p>Você nasceu para ser porto — mas também movimento. Quando une sensibilidade com ação, empatia com clareza, escuta com posicionamento, sua presença se torna referência. Você não apenas acolhe — você transforma.</p>`,
+    obstaculo: `<p>Sua sensibilidade é uma bússola poderosa — mas, quando não vem acompanhada de autoconfiança, pode se tornar uma armadilha silenciosa.</p>
+<p>O mesmo cuidado que acolhe pode adiar conversas importantes. A busca por paz pode gerar concessões que te afastam do que realmente acredita. O desejo de preservar o clima pode te fazer abrir mão da própria voz. E, aos poucos, você vai se esvaziando para manter os outros confortáveis.</p>
+<p>Você evita conflitos — e tudo bem. Mas, às vezes, ao evitá-los, deixa que ruídos cresçam no silêncio. Fica em dúvida se deve intervir, demora a se posicionar, espera que o outro perceba algo que você preferiu não dizer.</p>
+<p>Pode parecer mais simples adiar uma conversa difícil, deixar para depois uma decisão desconfortável, ou aceitar algo que não te representa — só para não "perturbar o equilíbrio". Mas esse preço é alto: você se sobrecarrega, acumula tensões internas, e se distancia da sua potência.</p>
+<p>E quanto mais você se anula para manter o entorno estável, mais a sua liderança perde nitidez. Porque o equilíbrio verdadeiro não é agradar a todos — é sustentar a sua verdade mesmo em cenários incertos.</p>
+<p>Quando você se permite existir por inteiro — com emoção, com opinião, com limites — seu impacto muda. Você deixa de apenas harmonizar o ambiente, e passa a inspirar uma transformação real. Com coragem tranquila. Com presença viva. Com você inteiro.</p>
+<p style="margin-top:16px;font-style:italic;color:#6b6b6b;font-size:14px;border-left:3px solid #e8e4da;padding-left:12px">Nem todos os comportamentos abaixo vão aparecer com a mesma força para você. <strong style="color:#1a1a1a">Leia com curiosidade, e não com julgamento. Às vezes, o sabotador não grita… mas sussurra.</strong></p>`,
+    fantasmas: [
+      { titulo: "Fuga",
+        cenario: "O dia começa e você sabe exatamente quais são as entregas críticas — uma lista de contato com potenciais clientes, uma proposta que precisa sair, um indicador que você precisa por foco, um alinhamento importante com o time, uma decisão que vem sendo adiada. Mas, ao invés de enfrentar essas tarefas, você mergulha nos e-mails, responde mensagens antigas, organiza a agenda, revisa documentos. Está ocupado, sim — mas não está avançando no que realmente importa. A justificativa vem rápida: «Preciso só limpar essas pendências, aí eu foco de verdade.» Mas o dia termina, e as tarefas centrais continuam no campo da intenção.",
+        impacto: "Você mantém a imagem de um líder presente, prestativo, sempre em movimento. Mas, por dentro, sente o peso de não ter feito o que realmente traria resultado. A sensação de utilidade momentânea mascara a frustração de não estar colocando sua energia onde ela mais faz diferença. Com o tempo, acumula sensação de atraso, autojulgamento e queda de performance — não por falta de competência, mas por medo do desconforto que algumas ações exigem.",
+        esconde: ["A tentativa inconsciente de evitar tarefas que exigem posicionamento, exposição ou cobrança. Procrastinação produtiva.","O medo de errar ou de ser julgado por entregar algo abaixo da expectativa","A necessidade de se manter 'agradável' e acessível, mesmo que isso atrase decisões importantes","Um padrão emocional onde estar ocupado é mais seguro do que estar vulnerável"],
+        ego: '"Pelo menos estou sendo produtivo!"' },
+      { titulo: "Autodepreciação",
+        cenario: "Você entregou um trimestre complexo com excelência. Criou soluções criativas sob pressão, manteve o time motivado mesmo com cortes, reorganizou processos e evitou perdas maiores. Mas, quando recebe um elogio da diretoria, minimiza: «Foi um esforço coletivo. Eu só fiz minha parte.»",
+        impacto: "Você começa a ser visto como alguém que entrega — mas que não precisa de reconhecimento. A liderança esquece de te celebrar, porque você mesmo se apaga. Seu time entende que elogio é algo que deve ser evitado, e você segue assumindo mais sem sequer se permitir comemorar. No fundo, a sua grande entrega perde força, porque você não se permite ocupá-la. E pior: você começa a duvidar se realmente fez diferença. Você não enxerga o próprio valor — e isso ensina o mundo a fazer o mesmo.",
+        esconde: ["A crença de que se valorizar demais é sinal de vaidade","O desconforto profundo com a ideia de 'ocupar espaço'","A ideia inconsciente de que só será amado se estiver sempre servindo","Um padrão emocional de invisibilidade que se repete mesmo em grandes conquistas"],
+        ego: '"Se eu aceitar o elogio, vão esperar mais ainda — e se eu falhar depois?"' },
+      { titulo: "Medo da Exposição",
+        cenario: "Você foi convidado para apresentar um projeto de inovação na convenção da empresa. Apesar de estar preparado, adia a finalização da apresentação. No dia, repassa para outro líder, justificando que ele «tem mais desenvoltura».",
+        impacto: "Você perde a oportunidade de visibilidade. A liderança sênior reconhece a entrega, mas não associa seu nome à iniciativa. Internamente, você sente que perdeu espaço, mas se convence de que «foi melhor assim».",
+        esconde: ["O medo de ser julgado por não estar perfeito","A dúvida sobre sua capacidade diante de um público de alto nível, síndrome do impostor","A crença de que errar em público compromete sua imagem"],
+        ego: '"Se eu falhar, vão ver que não sou tudo isso."' }
+    ],
+    estrategias: [
+      { titulo: "Quando você evita se posicionar para não gerar atrito...", oq: "Você percebe que o caminho escolhido não é o melhor. Mas, para não parecer confrontador, você silencia. Prefere preservar o clima a correr o risco de gerar desconforto. A reunião segue, a decisão é tomada — sem sua visão, sem sua análise, sem sua liderança.", ap: ["Escolha o momento certo, mas não adie sua voz.","Use frases que abrem espaço sem impor: «Posso trazer uma leitura que ainda não foi considerada?»","Entenda que discordar com respeito não rompe laços — fortalece confiança."], batalha: "Durante a revisão de estratégia, seu gestor define um novo parâmetro que compromete seu planejamento. Você pensa em deixar passar — mas não deixa: «Posso compartilhar uma preocupação antes de fecharmos essa decisão? Com essa estratégia, existe um risco real de sobrecarga e queda de qualidade. Acredito que vale revisarmos os impactos juntos.» Você não se opôs — você contribuiu." },
+      { titulo: "Quando você se apaga para não incomodar...", oq: "Você quer que o resultado fale por si — e ele fala. Mas ninguém ouve. Porque no mundo real, quem não se mostra, não é lembrado. Você não quer parecer arrogante, evita se autopromover, prefere não 'disputar palco'. Só que, no silêncio, sua liderança também deixa de ser vista.", ap: ["Comece a separar visibilidade de vaidade. Posicionamento é sobre clareza, não ego.","Quando a entrega for sua, não terceirize a apresentação.","Use frases simples e assertivas para marcar presença: «Essa parte fui eu que desenvolvi junto ao time. Posso apresentar?»"], batalha: "Você recebe um elogio da diretoria por um relatório. Sua reação automática é desviar: «Ah, foi o time. Só dei um apoio.» Mas você sabe que passou três noites refinando dados. Na próxima, você muda: «Agradeço. Eu cuidei da análise e estrutura dos dados. O resultado é coletivo, mas essa parte foi comigo.» Isso não é autopromoção. É maturidade para ocupar o lugar que você construiu." },
+      { titulo: "Quando o medo do confronto silencia sua liderança...", oq: "Você percebe o clima esquisito. Vê as falas atravessadas, os ruídos sutis, o incômodo que ninguém nomeia — mas você sente tudo. Só que, por medo de causar desconforto, você adia aquela conversa. Prefere esperar que as coisas se acalmem sozinhas. Mas não se acalmam.", ap: ["Enfrentar o desconforto é parte da sua entrega como líder — faz parte do seu papel!","Estruture uma fala direta, com escuta ativa e sem rodeios.","Use perguntas que abrem espaço e mantêm a conversa fluida."], batalha: "Duas vendedoras entraram em atrito por disputa de carteira. Dias depois, o cliente reclama da desorganização. Você chama as duas e diz: «Percebo que há um desconforto entre vocês que está começando a impactar o cliente. Vamos colocar isso na mesa agora e construir uma solução. Não estou aqui para apontar culpados, mas para garantir que o time e o cliente sejam bem cuidados.» Você cria espaço para diálogo com firmeza." },
+      { titulo: "Quando todo o peso vem parar nas suas costas...", oq: "Você não reclama. Vai absorvendo as urgências do time, tapando buracos, resolvendo o que ficou pendente. Faz ajustes no CRM, responde ao cliente no lugar do vendedor, reorganiza agenda de visita — tudo para evitar que a equipe sinta o baque. Só que, no fim, quem sente é você. E, o mais duro: ninguém percebe.", ap: ["Olhe para o seu dia e escolha uma tarefa operacional que você assumiu só para aliviar o time.","Transfira essa responsabilidade com confiança e critério. Isso não é abandonar — é desenvolver.","Lembre-se: manter todos protegidos enquanto você desmorona... não é liderança — é auto abandono."], batalha: "Um executivo de contas está com dificuldade em responder uma proposta sensível. Você quer escrever no lugar dele. Em vez disso, você chama e diz: «Vamos construir essa resposta juntos. Me mostra o rascunho e ajustamos os pontos críticos. Você precisa estar pronto para conduzir isso — e eu tô aqui pra te apoiar, não pra te substituir.» Você ainda cuida — mas sem se apagar." },
+      { titulo: "Quando o peso emocional te paralisa.", oq: "Você conhece o time, se conecta com as pessoas, sabe quem entrega resultado e também quem é 'o coração da equipe'. Mas quando precisa tomar uma decisão dura — como um desligamento — o peso emocional te paralisa. A dúvida vira desgaste. E o time começa a sentir que a liderança não age.", ap: ["Nem sempre a decisão mais difícil é a menos empática — às vezes, ela é a mais responsável.","Antes de decidir, separe o laço emocional da análise técnica.","Reconheça seu afeto — mas escolha com base em impacto, coerência e futuro do time."], batalha: "Você tem um colaborador antigo, querido, que há meses não entrega o básico. Você sabe que a decisão é inevitável. Então, você se prepara e comunica com verdade: «Essa escolha não apaga a história dele aqui — mas a liderança também exige que eu cuide do time como um todo. E isso, às vezes, passa por decisões que não são fáceis, mas são justas.» Você não precisa ser duro — precisa ser inteiro." },
+      { titulo: "Quando seu cuidado neutraliza a mensagem...", oq: "Você se preocupa com o impacto das palavras. Tenta suavizar, escolher cada frase com cautela, evitar constrangimentos. Mas no esforço de proteger, você esconde o que realmente precisa ser dito. O resultado? O outro não entende que precisa mudar.", ap: ["Feedback com respeito também precisa ter direção.","Substitua frases genéricas por exemplos específicos.","Finalize com uma pergunta clara: «Como você pretende agir a partir disso?»"], batalha: "Você contratou um profissional com ótimo currículo, mas 3 meses depois os resultados estão aquém. Evite: «Você tem potencial, só precisa de mais tempo.» Diga com clareza: «Você tem conhecimento técnico, isso é visível. Mas até agora, sua performance não correspondeu às metas acordadas. O que está te impedindo de entregar o que precisa? E como pretende mudar esse cenário a partir de agora?» Falar com empatia não é evitar o confronto — é ter coragem de tocar o ponto certo." },
+      { titulo: "Quando tudo vira emoção e nada vira direção…", oq: "Você começa o dia com foco, mas basta um comentário atravessado, uma reunião tensa ou um olhar preocupado de alguém do time para tudo desandar. Sua mente gira em círculos. A emoção toma o espaço da lógica. E, sem perceber, você passa o dia reagindo a sentimentos — e não liderando com clareza.", ap: ["Crie micro pausas de retorno ao seu eixo durante o dia.","Use perguntas de ancoragem: «O que realmente importa agora?», «Isso é problema ou percepção?»","Reconheça a emoção, mas não entregue o comando a ela."], batalha: "Durante uma manhã tensa, você percebe o time desmotivado e começa a duvidar até da estratégia que apresentou ontem. Antes de cancelar sua agenda e repensar tudo, pare por 3 minutos e diga para si mesmo: «O que nesse ambiente é fato, e o que é ruído emocional? Qual decisão prática posso tomar agora que mobilize o time?» Seu exemplo é poderoso. A maneira como você trata sua equipe, como encara os desafios, molda não apenas o desempenho, mas também a motivação de todos ao seu redor." }
+    ]
+  }
+};
+
+// DADOS DE EXEMPLO — em produção, isso vem do quiz
+const scores = {
+  C: parseInt(new URLSearchParams(location.search).get('C') || 72),
+  O: parseInt(new URLSearchParams(location.search).get('O') || 58),
+  R: parseInt(new URLSearchParams(location.search).get('R') || 45),
+  E: parseInt(new URLSearchParams(location.search).get('E') || 25)
+};
+
+const userName = new URLSearchParams(location.search).get('nome') || 'Líder';
+document.getElementById('userName').textContent = userName;
+
+const sorted = Object.entries(scores).sort((a,b) => b[1]-a[1]);
+const dominantes = sorted.slice(0,2);
+const desenvolvimento = sorted.slice(2);
+
+// Render barras
+const grid = document.getElementById('profilesGrid');
+sorted.forEach(([key, val]) => {
+  const p = PERFIS[key];
+  const isDom = dominantes.find(d => d[0] === key);
+  grid.innerHTML += `
+    <div class="profile-bar-item">
+      <div class="profile-bar-header">
+        <div class="profile-bar-label">
+          <span class="profile-dot" style="background:${p.cor}"></span>
+          ${p.nome}
+          ${isDom ? '<span style="font-size:10px;background:'+p.corLight+';color:'+p.cor+';padding:2px 8px;border-radius:10px;font-weight:500;">dominante</span>' : ''}
+        </div>
+        <div class="profile-bar-score" style="color:${p.cor}">${val}</div>
+      </div>
+      <div class="profile-bar-track">
+        <div class="profile-bar-fill" data-width="${val}" style="background:${p.cor}; width:0%"></div>
+      </div>
+      <div class="profile-bar-desc">${p.subtitulo}</div>
+    </div>
+  `;
+});
+
+// Animar barras
+setTimeout(() => {
+  document.querySelectorAll('.profile-bar-fill').forEach(el => {
+    el.style.width = el.dataset.width + '%';
+  });
+}, 200);
+
+// Render laudo dominantes
+const container = document.getElementById('laudoContainer');
+dominantes.forEach(([key, val], idx) => {
+  const p = PERFIS[key];
+  const rank = idx === 0 ? '1º perfil dominante' : '2º perfil';
+  const isOpen = idx === 0;
+
+  const fantasmasHtml = p.fantasmas.map(f => `
+    <div class="fantasma-item" style="border-left-color:${p.cor}">
+      <div class="fantasma-title">🎭 ${f.titulo}</div>
+      ${f.cenario ? `<div class="fantasma-section">Cenário realista</div><div class="laudo-content" style="font-size:14px;margin-bottom:12px">${f.cenario}</div>` : ''}
+      ${f.impacto ? `<div class="fantasma-section">Impacto</div><div class="laudo-content" style="font-size:14px;margin-bottom:12px">${f.impacto}</div>` : ''}
+      ${f.esconde ? `<div class="fantasma-section">O que esse fantasma esconde</div><ul class="fantasma-lista">${f.esconde.map(e=>`<li>${e}</li>`).join('')}</ul>` : (f.desc ? `<div class="laudo-content" style="font-size:14px;margin-bottom:12px">${f.desc}</div>` : '')}
+      <div class="fantasma-ego">${f.ego}</div>
+    </div>
+  `).join('');
+
+  const estrategiasHtml = p.estrategias.map((e, i) => `
+    <div class="estrategia-item">
+      <div class="estrategia-num">Estratégia ${i+1}</div>
+      <div class="estrategia-title">${e.titulo}</div>
+      ${e.oq ? `<div class="estrategia-section">O que acontece</div><div class="estrategia-desc">${e.oq}</div>` : ''}
+      ${e.ap ? `<div class="estrategia-section">O que aplicar</div><ul class="estrategia-lista">${e.ap.map(a=>`<li>${a}</li>`).join('')}</ul>` : (e.desc ? `<div class="estrategia-desc">${e.desc}</div>` : '')}
+      <div class="campo-batalha">📌 No campo de batalha: <span>${e.batalha}</span></div>
+    </div>
+  `).join('');
+
+  container.innerHTML += `
+    <div class="laudo-card">
+      <div class="laudo-header" onclick="toggleLaudo('laudo-${key}', this)">
+        <div>
+          <div class="laudo-rank" style="color:${p.cor}">${rank} · ${val} pontos</div>
+          <div class="laudo-profile-name" style="color:${p.cor}">${p.nome}</div>
+          <div class="laudo-arquetipo">Arquétipo: ${p.arquetipo} · Lado Mestre: ${p.mestre}</div>
+        </div>
+        <div class="laudo-toggle ${isOpen ? 'open' : ''}">›</div>
+      </div>
+      <div id="laudo-${key}" class="laudo-collapsible ${isOpen ? 'open' : ''}">
+        <div class="laudo-tabs">
+          <div class="laudo-tab active" onclick="switchTab(this, 'tab-${key}-resumo')">Seu perfil</div>
+          <div class="laudo-tab" onclick="switchTab(this, 'tab-${key}-obstaculo')">Quando vira obstáculo</div>
+          <div class="laudo-tab" onclick="switchTab(this, 'tab-${key}-fantasmas')">Seus fantasmas</div>
+          <div class="laudo-tab" onclick="switchTab(this, 'tab-${key}-estrategias')">Estratégias</div>
+        </div>
+        <div id="tab-${key}-resumo" class="laudo-body active">
+          <div class="laudo-content">${p.resumo || ""}</div>
+        </div>
+        <div id="tab-${key}-obstaculo" class="laudo-body">
+          <div class="laudo-content">${p.obstaculo || ""}</div>
+        </div>
+        <div id="tab-${key}-fantasmas" class="laudo-body">
+          ${fantasmasHtml}
+        </div>
+        <div id="tab-${key}-estrategias" class="laudo-body">
+          ${estrategiasHtml}
+        </div>
+      </div>
+    </div>
+  `;
+});
+
+// Render desenvolvimento
+const devCards = document.getElementById('devCards');
+desenvolvimento.forEach(([key, val]) => {
+  const p = PERFIS[key];
+  devCards.innerHTML += `
+    <div class="dev-card">
+      <div class="dev-card-label">perfil menos ativo · ${val} pontos</div>
+      <div class="dev-card-profile" style="color:${p.cor}">${p.nome}</div>
+      <div class="badge-mestre" style="background:${p.corLight};color:${p.cor}">Lado Mestre: ${p.mestre}</div>
+      <div class="dev-card-desc">${p.descMestre}</div>
+    </div>
+  `;
+});
+
+function toggleLaudo(id, header) {
+  const el = document.getElementById(id);
+  const toggle = header.querySelector('.laudo-toggle');
+  el.classList.toggle('open');
+  toggle.classList.toggle('open');
+}
+
+function switchTab(tab, targetId) {
+  const card = tab.closest('.laudo-card');
+  card.querySelectorAll('.laudo-tab').forEach(t => t.classList.remove('active'));
+  card.querySelectorAll('.laudo-body').forEach(b => b.classList.remove('active'));
+  tab.classList.add('active');
+  document.getElementById(targetId).classList.add('active');
+}
+</script>
+</body>
+</html>
