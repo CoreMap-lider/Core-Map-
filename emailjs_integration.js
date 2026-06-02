@@ -1,15 +1,11 @@
 // emailjs_integration.js
-// Redireciona para a página de laudo ao invés de enviar e-mail
+// Envia lead para Formspree + redireciona para laudo
 
 function enviarLaudoPorEmail(email, nome, perfil) {
   return new Promise(function(resolve) {
 
-    // Recupera os scores do quiz — calculados em showResult() no index.html
-    // A função é chamada com o perfil predominante já calculado,
-    // mas precisamos dos 4 scores completos. Lemos do DOM.
+    // Recupera os scores do quiz
     var scores = { C: 0, O: 0, R: 0, E: 0 };
-
-    // Lê as pontuações das barras já renderizadas no resultado
     document.querySelectorAll('.bar-row').forEach(function(row) {
       var letra = row.querySelector('.bl').textContent.trim();
       var pts = row.querySelector('.bn').textContent.replace(' pts', '').trim();
@@ -18,18 +14,31 @@ function enviarLaudoPorEmail(email, nome, perfil) {
       }
     });
 
-    // Monta a URL para a página de laudo
-    var params = new URLSearchParams({
-      C: scores.C,
-      O: scores.O,
-      R: scores.R,
-      E: scores.E,
-      nome: nome || 'Líder'
+    // Envia lead para Formspree (você recebe por email)
+    fetch('https://formspree.io/f/xdavnaje', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nome: nome,
+        email: email,
+        perfil_predominante: perfil,
+        pontuacao_C: scores.C,
+        pontuacao_O: scores.O,
+        pontuacao_R: scores.R,
+        pontuacao_E: scores.E
+      })
+    }).finally(function() {
+      // Redireciona para o laudo independente do resultado do envio
+      var params = new URLSearchParams({
+        C: scores.C,
+        O: scores.O,
+        R: scores.R,
+        E: scores.E,
+        nome: nome || 'Líder'
+      });
+      window.location.href = 'coremap-resultado.html?' + params.toString();
+      resolve({ sucesso: true });
     });
 
-    // Redireciona para o laudo completo
-    window.location.href = 'coremap-resultado.html?' + params.toString();
-
-    resolve({ sucesso: true });
   });
 }
