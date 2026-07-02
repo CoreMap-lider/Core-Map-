@@ -36,7 +36,9 @@ function enviarLaudoPorEmail(email, nome, perfil) {
         E: scores.E,
         nome: nome || 'Líder'
       });
-      window.location.href = 'pilula-core-map.html?' + params.toString();
+      var acesso = new URLSearchParams(window.location.search).get('acesso');
+      var destino = (acesso === 'completo') ? 'coremap-resultado.html' : 'pilula-core-map.html';
+      window.location.href = destino + '?' + params.toString();
       resolve({ sucesso: true });
     });
 
