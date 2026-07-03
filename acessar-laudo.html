@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CORE MAP — Acessando seu laudo</title>
+<style>
+  body {
+    font-family: -apple-system, sans-serif;
+    background: #f8f6f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 24px;
+    text-align: center;
+  }
+  .box { max-width: 420px; }
+  h1 { font-size: 20px; color: #1a1a1a; margin-bottom: 12px; }
+  p { color: #4a4a4a; font-size: 15px; line-height: 1.6; }
+  a.btn {
+    display: inline-block;
+    margin-top: 20px;
+    background: #1a6b5a;
+    color: #fff;
+    text-decoration: none;
+    padding: 14px 24px;
+    border-radius: 10px;
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+<div class="box" id="box">
+  <h1>Preparando seu laudo completo...</h1>
+  <p>Só um instante.</p>
+</div>
+<script>
+  try {
+    var raw = localStorage.getItem('coremap_scores');
+    if (raw) {
+      var d = JSON.parse(raw);
+      var params = new URLSearchParams({
+        C: d.C, O: d.O, R: d.R, E: d.E, nome: d.nome || 'Lider'
+      });
+      window.location.href = 'coremap-resultado.html?' + params.toString();
+    } else {
+      document.getElementById('box').innerHTML =
+        '<h1>Quase lá!</h1>' +
+        '<p>Não encontramos suas respostas neste aparelho. Isso acontece quando a compra é feita em um dispositivo diferente do que você usou para fazer o quiz gratuito.</p>' +
+        '<p>Sem problema — leva só 3 minutinhos para refazer:</p>' +
+        '<a class="btn" href="index.html">Responder o quiz e gerar meu laudo</a>';
+    }
+  } catch(e) {
+    document.getElementById('box').innerHTML =
+      '<h1>Quase lá!</h1><a class="btn" href="index.html">Responder o quiz e gerar meu laudo</a>';
+  }
+</script>
+</body>
+</html>
