@@ -135,3 +135,58 @@
       '<p>Não encontramos suas respostas neste aparelho. Isso acontece quando o quiz foi feito em um dispositivo diferente.</p>' +
       '<p>Digite o e-mail que você usou no quiz gratuito para localizarmos seu resultado:</p>' +
       '<input type="email" id="emailInput" placeholder="seu@email.com">' +
+      '<div class="erro" id="erroMsg">Não encontramos esse e-mail. Verifique se digitou certo.</div>' +
+      '<button class="btn" onclick="confirmarEmail()">Buscar meu laudo</button>' +
+      '<a class="link-alt" href="index.html">Prefiro refazer o quiz</a>';
+
+    document.getElementById('emailInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') confirmarEmail();
+    });
+  }
+
+  function confirmarEmail() {
+    var input = document.getElementById('emailInput');
+    var email = input.value.trim();
+    if (!email || email.indexOf('@') === -1) {
+      document.getElementById('erroMsg').style.display = 'block';
+      document.getElementById('erroMsg').textContent = 'Digite um e-mail válido.';
+      return;
+    }
+    buscarPorEmail(email);
+  }
+
+  function mostrarNaoEncontrado() {
+    document.getElementById('box').innerHTML =
+      '<h1>Não encontramos esse e-mail</h1>' +
+      '<p>Verifique se digitou o mesmo e-mail usado no quiz gratuito, com atenção a maiúsculas e espaços.</p>' +
+      '<input type="email" id="emailInput" placeholder="seu@email.com">' +
+      '<button class="btn" onclick="confirmarEmail()">Tentar novamente</button>' +
+      '<a class="link-alt" href="index.html">Prefiro refazer o quiz</a>';
+
+    document.getElementById('emailInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') confirmarEmail();
+    });
+  }
+
+  function mostrarErroDeConexao() {
+    document.getElementById('box').innerHTML =
+      '<h1>Ops, algo deu errado</h1>' +
+      '<p>Não conseguimos buscar seu resultado agora. Tente novamente em instantes.</p>' +
+      '<button class="btn" onclick="location.reload()">Tentar novamente</button>' +
+      '<a class="link-alt" href="index.html">Prefiro refazer o quiz</a>';
+  }
+
+  try {
+    var raw = localStorage.getItem('coremap_scores');
+    if (raw) {
+      var d = JSON.parse(raw);
+      irParaLaudo(d);
+    } else {
+      mostrarFormularioEmail();
+    }
+  } catch(e) {
+    mostrarFormularioEmail();
+  }
+</script>
+</body>
+</html>
