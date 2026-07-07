@@ -16,10 +16,10 @@
     padding: 24px;
     text-align: center;
   }
-  .box { max-width: 420px; }
+  .box { max-width: 420px; width: 100%; }
   h1 { font-size: 20px; color: #1a1a1a; margin-bottom: 12px; }
   p { color: #4a4a4a; font-size: 15px; line-height: 1.6; }
-  a.btn {
+  a.btn, button.btn {
     display: inline-block;
     margin-top: 20px;
     background: #1a6b5a;
@@ -28,6 +28,32 @@
     padding: 14px 24px;
     border-radius: 10px;
     font-weight: 500;
+    border: none;
+    font-size: 15px;
+    cursor: pointer;
+    width: 100%;
+  }
+  input[type="email"] {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    font-size: 15px;
+    margin-top: 16px;
+    box-sizing: border-box;
+  }
+  .erro {
+    color: #b83a3a;
+    font-size: 13px;
+    margin-top: 10px;
+    display: none;
+  }
+  .link-alt {
+    display: block;
+    margin-top: 16px;
+    color: #4a4a4a;
+    font-size: 13px;
+    text-decoration: underline;
   }
 </style>
 </head>
@@ -37,25 +63,75 @@
   <p>Só um instante.</p>
 </div>
 <script>
-  try {
-    var raw = localStorage.getItem('coremap_scores');
-    if (raw) {
-      var d = JSON.parse(raw);
-      var params = new URLSearchParams({
-        C: d.C, O: d.O, R: d.R, E: d.E, nome: d.nome || 'Lider'
-      });
-      window.location.href = 'coremap-resultado.html?' + params.toString();
-    } else {
-      document.getElementById('box').innerHTML =
-        '<h1>Quase lá!</h1>' +
-        '<p>Não encontramos suas respostas neste aparelho. Isso acontece quando a compra é feita em um dispositivo diferente do que você usou para fazer o quiz gratuito.</p>' +
-        '<p>Sem problema — leva só 3 minutinhos para refazer:</p>' +
-        '<a class="btn" href="index.html">Responder o quiz e gerar meu laudo</a>';
-    }
-  } catch(e) {
-    document.getElementById('box').innerHTML =
-      '<h1>Quase lá!</h1><a class="btn" href="index.html">Responder o quiz e gerar meu laudo</a>';
+  var SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRPe5FHEVP117JphzdnZnsfSuNQfYkDGuPw2DyDhydTnRauJn8etF0X5QE4BAR1JhgduVwG_6_LUQ0w/pub?output=csv';
+
+  function irParaLaudo(d) {
+    var params = new URLSearchParams({
+      C: d.C, O: d.O, R: d.R, E: d.E, nome: d.nome || 'Lider'
+    });
+    window.location.href = 'coremap-resultado.html?' + params.toString();
   }
-</script>
-</body>
-</html>
+
+  function parseCSVLine(line) {
+    var result = [];
+    var cur = '';
+    var inQuotes = false;
+    for (var i = 0; i < line.length; i++) {
+      var ch = line[i];
+      if (ch === '"') {
+        inQuotes = !inQuotes;
+      } else if (ch === ',' && !inQuotes) {
+        result.push(cur);
+        cur = '';
+      } else {
+        cur += ch;
+      }
+    }
+    result.push(cur);
+    return result;
+  }
+
+  function buscarPorEmail(emailBuscado) {
+    var box = document.getElementById('box');
+    box.innerHTML = '<h1>Procurando seu resultado...</h1><p>Só um instante.</p>';
+
+    fetch(SHEET_CSV_URL)
+      .then(function(res) { return res.text(); })
+      .then(function(csvText) {
+        var linhas = csvText.trim().split('\n');
+        var emailAlvo = emailBuscado.trim().toLowerCase();
+        var encontrado = null;
+
+        for (var i = linhas.length - 1; i >= 1; i--) {
+          var campos = parseCSVLine(linhas[i]);
+          var emailLinha = (campos[1] || '').trim().toLowerCase();
+          if (emailLinha === emailAlvo) {
+            encontrado = campos[2] || '';
+            break;
+          }
+        }
+
+        if (encontrado) {
+          var scores = { C: 0, O: 0, R: 0, E: 0 };
+          encontrado.split(',').forEach(function(par) {
+            var partes = par.split(':');
+            var letra = (partes[0] || '').trim();
+            var valor = parseInt((partes[1] || '0').trim()) || 0;
+            if (scores.hasOwnProperty(letra)) scores[letra] = valor;
+          });
+          irParaLaudo({ C: scores.C, O: scores.O, R: scores.R, E: scores.E, nome: 'Lider' });
+        } else {
+          mostrarNaoEncontrado();
+        }
+      })
+      .catch(function() {
+        mostrarErroDeConexao();
+      });
+  }
+
+  function mostrarFormularioEmail() {
+    document.getElementById('box').innerHTML =
+      '<h1>Quase lá!</h1>' +
+      '<p>Não encontramos suas respostas neste aparelho. Isso acontece quando o quiz foi feito em um dispositivo diferente.</p>' +
+      '<p>Digite o e-mail que você usou no quiz gratuito para localizarmos seu resultado:</p>' +
+      '<input type="email" id="emailInput" placeholder="seu@email.com">' +
